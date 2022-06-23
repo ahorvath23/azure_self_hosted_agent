@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: horvathattila-agent-devops-labor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-devops-labor
+  template:
+    metadata:
+      labels:
+        app: agent-devops-labor
+    spec:
+      containers:
+      - name: agent-devops-labor
+        image: nexus.alerant.hu/azure-agent/devops-labor-agent:1.0.0-SNAPSHOT
+        imagePullPolicy: Always
+        env:
+          - name: AZP_URL
+            value: https://dev.azure.com/horvathattila-labor/
+          - name: AZP_TOKEN
+            value: mphhdtxn2etdmer25eq7dcpcvpwsvwlmbeozfgn6tmrdyyi63kua
+          - name: AZP_POOL
+            value: Default
+          - name: AZP_AGENT_NAME
+            value: DevOps-Labor-Agent

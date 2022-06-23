@@ -1,0 +1,53 @@
+# Build pipeline
+
+name: "Build labor agent - '${{ parameters.ImageTag }}'"
+
+parameters:
+- name: ImageTag
+  displayName: Docker image tag
+  type: string
+  default: 1.0.0-SNAPSHOT
+
+trigger:
+- none
+
+pool:
+  name: Default
+
+jobs:
+- job:
+  variables:
+  - group: 'Pipeline variables'
+  - name: DockerFile
+    value: './Dockerfile'
+  - name: WorkDir
+    value: '.'
+  - name: BuildArg
+    value: 'APP_TARGET_DIR=target'
+  - name: ImageName
+    value: "azure-agent/devops-labor-agent"
+  - name: DockerRepo
+    value: nexus.alerant.hu
+  - name: DockerReleaseRegistry
+    value: nexus.alerant.hu
+  - name: DockerSnapshotRegistry
+    value: nexus.alerant.hu
+  steps:
+  - task: CmdLine@2
+    inputs:
+      script: |
+        buildah login --tls-verify=0 -u $(DockerRegistryUser) -p $(DockerRegistryPassword) $(DockerRepo)
+        buildah login --tls-verify=0 -u $(DockerRegistryUser) -p $(DockerRegistryPassword) $(DockerReleaseRegistry)
+        buildah login --tls-verify=0 -u $(DockerRegistryUser) -p $(DockerRegistryPassword) $(DockerSnapshotRegistry)
+        cp /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem .
+        buildah bud --tls-verify=0 --format=docker -t $(ImageName):${{ parameters.ImageTag }} -f $(DockerFile) .
+      workingDirectory: $(WorkDir)
+    displayName: 'Image build: $(ImageName)'
+  - task: CmdLine@2
+    inputs:
+      script: |
+        if [[ ${{ parameters.ImageTag }} == *"SNAPSHOT"* ]]; then export DOCKER_REGISTRY=$(DockerSnapshotRegistry); else export DOCKER_REGISTRY=$(DockerReleaseRegistry); fi
+        buildah tag $(ImageName):${{ parameters.ImageTag }} $DOCKER_REGISTRY/$(ImageName):${{ parameters.ImageTag }}
+        echo "##[debug]Upload image: $DOCKER_REGISTRY/$(ImageName):${{ parameters.ImageTag }}"
+        buildah push --tls-verify=0 $DOCKER_REGISTRY/$(ImageName):${{ parameters.ImageTag }}
+    displayName: 'Image push: $(ImageName)'
