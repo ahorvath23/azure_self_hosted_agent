@@ -19,7 +19,7 @@ jobs:
   steps:
   - task: Docker@2
     inputs:
-      containerRegistry: 'Docker Registry'
+      containerRegistry: 'DevOps Bootcamp Docker Registry'
       repository: 'azure-agent/self-hosted-agent'
       command: 'buildAndPush'
       Dockerfile: '**/Dockerfile'
