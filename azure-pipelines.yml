@@ -12,19 +12,17 @@ trigger:
 - none
 
 pool:
-  name: Default
+  vmImage: ubuntu-latest
 
 jobs:
 - job:
-  variables:
-  - group: 'Pipeline variables'
-  - name: DockerFile
-    value: './Dockerfile'
-  - name: WorkDir
-    value: '.'
-  - name: BuildArg
-    value: 'APP_TARGET_DIR=target'
-  - name: ImageName
-    value: "azure-agent/self-hosted-agent"
   steps:
-
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'Docker Registry'
+      repository: 'azure-agent/self-hosted-agent'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: '${{ parameters.ImageTag }}'
+      addPipelineData: false
+      addBaseImageData: false
