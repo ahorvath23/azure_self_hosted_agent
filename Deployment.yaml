@@ -1,27 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: horvathattila-agent-devops-labor
+  name: agent-devops-bootcamp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: agent-devops-labor
+      app: agent-devops-bootcamp
   template:
     metadata:
       labels:
-        app: agent-devops-labor
+        app: agent-devops-bootcamp
     spec:
       containers:
-      - name: agent-devops-labor
-        image: nexus.alerant.hu/azure-agent/devops-labor-agent:1.0.0-SNAPSHOT
+      - name: agent-devops-bootcamp
+        image: alerantdevopsbootcamp.azurecr.io/azure-agent/self-hosted-agent:1.0.0
         imagePullPolicy: Always
         env:
           - name: AZP_URL
-            value: https://dev.azure.com/horvathattila-labor/
+            value: https://dev.azure.com/horvathattila/
           - name: AZP_TOKEN
-            value: mphhdtxn2etdmer25eq7dcpcvpwsvwlmbeozfgn6tmrdyyi63kua
+            value: zsqi3gvf5tlnvgwtlsdcii2qoj2tmuo2iwjl45plfzhjkndvgl7q
           - name: AZP_POOL
             value: Default
           - name: AZP_AGENT_NAME
-            value: DevOps-Labor-Agent
+            value: DevOps-BootCamp-Agent
+      imagePullSecrets:
+      - name: bootcamp-pull-secret
